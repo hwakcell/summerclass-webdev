@@ -3,6 +3,7 @@ import TicketList from './components/TicketList';
 import TicketForm from './components/TicketForm';
 import TicketDetails from './components/TicketDetails';
 import TicketSummary from './components/TicketSummary';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';  
 
 const defaultTickets = [
   {
@@ -32,7 +33,32 @@ const defaultTickets = [
 function App() {
   const [tickets, setTickets] = useState(() => {
     const saved = window.localStorage.getItem('customer-tickets');
-    return saved ? JSON.parse(saved) : defaultTickets;
+    if (!saved) {
+      return defaultTickets;
+    }
+
+    try {
+      const parsed = JSON.parse(saved);
+      const loaded = Array.isArray(parsed) ? parsed : parsed?.tickets;
+      if (!Array.isArray(loaded)) {
+        return defaultTickets;
+      }
+
+      return loaded.map((ticket) => ({
+        id: typeof ticket.id === 'number' ? ticket.id : Number(ticket.id) || 0,
+        subject: ticket.subject ?? '',
+        description: ticket.description ?? '',
+        category: ticket.category ?? 'General',
+        priority: ticket.priority ?? 'Low',
+        status: ticket.status ?? 'Open',
+        comments: Array.isArray(ticket.comments) ? ticket.comments : [],
+        createdAt: ticket.createdAt ?? new Date().toISOString().slice(0, 10),
+      }));
+    } catch (error) {
+      // ignore invalid localStorage content and use defaults
+    }
+
+    return defaultTickets;
   });
   const [activeView, setActiveView] = useState('list');
   const [query, setQuery] = useState('');
@@ -89,17 +115,22 @@ function App() {
     setSelectedTicketId(newTicket.id);
   };
 
+  const handleViewTicket = (ticketId) => {
+    setSelectedTicketId(ticketId);
+  };
+
   const handleAddComment = (ticketId, text) => {
     if (!text.trim()) return;
 
     setTickets(
       tickets.map((ticket) => {
         if (ticket.id === ticketId) {
+          const existingComments = Array.isArray(ticket.comments) ? ticket.comments : [];
           return {
             ...ticket,
             comments: [
-              ...ticket.comments,
-              { id: ticket.comments.length + 1, text: text.trim(), createdAt: new Date().toISOString().slice(0, 10) },
+              ...existingComments,
+              { id: existingComments.length + 1, text: text.trim(), createdAt: new Date().toISOString().slice(0, 10) },
             ],
           };
         }
@@ -180,7 +211,7 @@ function App() {
             </div>
 
             {activeView === 'list' && (
-              <TicketList tickets={filteredTickets} onViewTicket={setSelectedTicketId} />
+              <TicketList tickets={filteredTickets} onViewTicket={handleViewTicket} />
             )}
             {activeView === 'create' && (
               <TicketForm form={form} onChange={handleFormChange} onSubmit={handleSubmitTicket} />

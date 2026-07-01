@@ -1,23 +1,35 @@
 import { useState } from 'react';
+import Panel from './Panel';
+
+function CommentList({ comments }) {
+  return (
+    <div className="space-y-3">
+      {comments.map((commentItem) => (
+        <div key={commentItem.id} className="rounded-3xl bg-white p-3 shadow-sm">
+          <p className="text-sm text-slate-800">{commentItem.text}</p>
+          <p className="mt-1 text-xs text-slate-500">{commentItem.createdAt}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function TicketDetails({ ticket, onAddComment, onChangeStatus }) {
   const [comment, setComment] = useState('');
 
   if (!ticket) {
     return (
-      <div className="rounded-3xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">Ticket details</h2>
-        <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
+      <Panel title="Ticket details">
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-slate-600">
           Select a ticket to see the details.
         </div>
-      </div>
+      </Panel>
     );
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-semibold text-slate-900">Ticket details</h2>
-      <div className="mt-5 space-y-4 text-slate-600">
+    <Panel title="Ticket details">
+      <div className="space-y-4 text-slate-600">
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
           <p className="font-semibold text-slate-900">{ticket.subject}</p>
           <p className="text-sm text-slate-500">Ticket #{ticket.id}</p>
@@ -45,14 +57,7 @@ export default function TicketDetails({ ticket, onAddComment, onChangeStatus }) 
           {ticket.comments.length === 0 ? (
             <p className="text-sm text-slate-500">No comments yet.</p>
           ) : (
-            <div className="space-y-3">
-              {ticket.comments.map((commentItem) => (
-                <div key={commentItem.id} className="rounded-3xl bg-white p-3 shadow-sm">
-                  <p className="text-sm text-slate-800">{commentItem.text}</p>
-                  <p className="mt-1 text-xs text-slate-500">{commentItem.createdAt}</p>
-                </div>
-              ))}
-            </div>
+            <CommentList comments={ticket.comments} />
           )}
 
           <div className="space-y-3">
@@ -76,6 +81,6 @@ export default function TicketDetails({ ticket, onAddComment, onChangeStatus }) 
           </div>
         </div>
       </div>
-    </div>
+    </Panel>
   );
 }

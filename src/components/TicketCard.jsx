@@ -1,6 +1,8 @@
+import Panel from './Panel';
+
 export default function TicketCard({ ticket, onView }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <Panel>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-lg font-semibold text-slate-900">{ticket.subject}</p>
@@ -15,6 +17,6 @@ export default function TicketCard({ ticket, onView }) {
         </button>
       </div>
       <p className="mt-4 text-sm text-slate-600">{ticket.description}</p>
-    </div>
+    </Panel>
   );
 }
